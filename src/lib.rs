@@ -1,3 +1,3 @@
 mod wrapper;
-pub use wrapper::Dramsim2Wrapper;
+pub use wrapper::RamulatorWrapper;
 

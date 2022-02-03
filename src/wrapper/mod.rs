@@ -4,122 +4,64 @@ mod extern_api;
 
 use extern_api::*;
 
-
-#[cfg(test)]
-mod tests {
-    use std::collections::HashSet;
-
-    #[test]
-    fn get_channel_id_test() {
-        use super::Dramsim2Wrapper;
-        let mut dramsim = Dramsim2Wrapper::new();
-        println!("channel_id: {}", dramsim.get_channel_id(64));
-    }
-
-    #[test]
-    fn dramsim2_wrapper_test() {
-        use super::*;
-        let mut dramsim = Dramsim2Wrapper::new();
-        dramsim.send(1, false);
-        while !dramsim.ret_available() {
-            dramsim.tick();
-        }
-        let ret = dramsim.get();
-        assert_eq!(ret, 1);
-        dramsim.tick();
-        assert_eq!(dramsim.ret_available(), false);
-        assert_eq!(dramsim.available(0, false), true);
-    }
-
-    #[test]
-    fn dramsim2_wrapper_full_test() {
-        use super::Dramsim2Wrapper;
-        let mut dramsim = Dramsim2Wrapper::new();
-        let mut cycle = 0;
-        let count = 10u64;
-        let mut all_req: HashSet<_> = (1..count).into_iter().map(|i| i * 64).collect();
-        for i in 1..count {
-            while !dramsim.available(i * 64, false) {
-                dramsim.tick();
-                cycle += 1;
-            }
-            let result = dramsim.send(i * 64, false);
-            dramsim.tick();
-
-            assert_eq!(result, true);
-        }
-        for _i in 1..count {
-            while !dramsim.ret_available() {
-                dramsim.tick();
-                cycle += 1;
-            }
-            let result = dramsim.get();
-            dramsim.tick();
-
-            //assert!(all_req.contains(&result));
-            println!("{}", result);
-            all_req.remove(&result);
-        }
-        println!("cycle: {}", cycle);
-    }
-}
-
-
 #[derive(Debug)]
-pub struct Dramsim2Wrapper<'a> {
-    data: &'a mut libc::c_void,
+pub struct RamulatorWrapper {
+    data: u64,
 }
 
-impl<'a> Dramsim2Wrapper<'a> {
+impl RamulatorWrapper {
     pub fn new() -> Self {
         unsafe {
-            let dramsim2 = get_dramsim2();
+            let ramulator = get_ramulator();
 
-            Dramsim2Wrapper {
-                data: &mut *dramsim2,
+            RamulatorWrapper {
+                data: ramulator as u64,
             }
         }
     }
 }
 
-impl<'a> Drop for Dramsim2Wrapper<'a> {
+impl Drop for RamulatorWrapper {
     fn drop(&mut self) {
         unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
+            let ramulator_ptr = self.data as *mut libc::c_void;
 
-            delete_dramsim2(dramsim_ptr);
+            delete_ramulator(ramulator_ptr);
         }
     }
 }
 
-impl<'a> Dramsim2Wrapper<'a> {
-    pub fn send(&mut self, addr: u64, is_write: bool) -> bool {
+impl RamulatorWrapper {
+    pub fn send(&mut self, addr: u64, is_write: bool)  {
         unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
-            let ret = dramsim2_send(dramsim_ptr, addr, is_write as libc::boolean_t);
-            match ret {
-                0 => false,
-                _ => true,
-            }
+            let ramulator_ptr = self.data as *mut libc::c_void;
+            ramulator_send(ramulator_ptr, addr, is_write as libc::boolean_t);
+            
         }
     }
-    pub fn get(&mut self) -> u64 {
+    pub fn get(&self) -> u64 {
         unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
-            dramsim2_get(dramsim_ptr)
+            let ramulator_ptr = self.data as *const libc::c_void;
+            ramulator_get(ramulator_ptr)
         }
     }
-    pub fn tick(&mut self) {
+    pub fn pop(&mut self) -> u64 {
         unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
-            dramsim2_tick(dramsim_ptr);
+            let ramulator_ptr = self.data as *mut libc::c_void;
+            ramulator_pop(ramulator_ptr)
+        }
+    }
+    pub fn cycle(&mut self) {
+        unsafe {
+            let ramulator_ptr = self.data as *mut libc::c_void;
+            ramulator_cycle(ramulator_ptr);
         }
     }
     pub fn ret_available(&mut self) -> bool {
         unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
+            let ramulator_ptr = self.data as *mut libc::c_void;
 
-            match dramsim2_ret_available(dramsim_ptr) {
+            match ramulator_ret_available(ramulator_ptr) {
                 0 => false,
                 _ => true,
             }
@@ -127,19 +69,76 @@ impl<'a> Dramsim2Wrapper<'a> {
     }
     pub fn available(&mut self, addr: u64, is_write: bool) -> bool {
         unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
+            let ramulator_ptr = self.data as *mut libc::c_void;
 
-            match dramsim2_available(dramsim_ptr, addr, is_write as libc::boolean_t) {
+            match ramulator_available(ramulator_ptr, addr, is_write as libc::boolean_t) {
                 0 => false,
                 _ => true,
             }
         }
     }
-    pub fn get_channel_id(&mut self, addr: u64) -> i32 {
-        unsafe {
-            let dramsim_ptr = self.data as *mut libc::c_void;
+    
+}
 
-            dramsim2_get_channel_id(dramsim_ptr, addr)
+#[cfg(test)]
+mod tests {
+    use std::collections::HashSet;
+
+    
+
+    #[test]
+    fn ramulator_wrapper_test() {
+        use super::*;
+        let mut ramulator = RamulatorWrapper::new();
+        ramulator.send(1, false);
+        while !ramulator.ret_available() {
+            ramulator.cycle();
         }
+        let ret = ramulator.get();
+        assert_eq!(ret, 1);
+        assert_eq!(ramulator.ret_available(), true);
+        ramulator.cycle();
+        ramulator.pop();
+        ramulator.cycle();
+
+        assert_eq!(ramulator.ret_available(), false);
+        assert_eq!(ramulator.available(0, false), true);
+    }
+
+    #[test]
+    fn ramulator_wrapper_full_test() {
+        use super::RamulatorWrapper;
+        let mut ramulator = RamulatorWrapper::new();
+        let mut cycle = 0;
+        let count = 10u64;
+        let mut all_req: HashSet<_> = (1..count).into_iter().map(|i| i * 64).collect();
+        for i in 1..count {
+            while !ramulator.available(i * 64, false) {
+                ramulator.cycle();
+                cycle += 1;
+            }
+            ramulator.send(i * 64, false);
+            ramulator.cycle();
+
+        }
+        for _i in 1..count {
+            while !ramulator.ret_available() {
+                ramulator.cycle();
+                cycle += 1;
+            }
+            let result = ramulator.pop();
+            ramulator.cycle();
+
+            //assert!(all_req.contains(&result));
+            println!("{}", result);
+            all_req.remove(&result);
+        }
+        for _i in 0..1000{
+            ramulator.cycle();
+        }
+        assert_eq!(ramulator.ret_available(), false);
+
+        println!("cycle: {}", cycle);
     }
 }
+
