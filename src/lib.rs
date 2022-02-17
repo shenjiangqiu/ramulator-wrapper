@@ -1,6 +1,6 @@
 //! # a wrapper for ramulator
-//! - the crate ramulator_wrapper is a wrapper of famouse dram simulator:ramulator.original url:https://github.com/CMU-SAFARI/ramulator
-//! - in order to better use the ramulator, I use another modified version of ramulator:https://github.com/shenjiangqiu/ramulator
+//! - the crate ramulator_wrapper is a wrapper of famouse dram simulator:ramulator.original url:<https://github.com/CMU-SAFARI/ramulator>
+//! - in order to better use the ramulator, I use another modified version of ramulator:<https://github.com/shenjiangqiu/ramulator>
 //! - the modified version of ramulator support multithread, and fix some bugs.
 //! # Example
 //! ```
