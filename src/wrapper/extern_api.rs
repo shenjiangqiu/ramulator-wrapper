@@ -1,5 +1,5 @@
 extern {
-    pub(super) fn get_ramulator() -> *mut libc::c_void;
+    pub(super) fn get_ramulator(config_name:*const libc::c_void) -> *mut libc::c_void;
     pub(super) fn delete_ramulator(ramulator: *mut libc::c_void);
     pub(super) fn ramulator_send(
         ramulator: *mut libc::c_void,

@@ -1,3 +1,5 @@
+use std::ffi::CString;
+
 use libc;
 
 mod extern_api;
@@ -10,9 +12,11 @@ pub struct RamulatorWrapper {
 }
 
 impl RamulatorWrapper {
-    pub fn new() -> Self {
+    pub fn new(config_name: &str) -> Self {
         unsafe {
-            let ramulator = get_ramulator();
+            // get c str from config_name
+            let c_str = CString::new(config_name).unwrap();
+            let ramulator = get_ramulator(c_str.as_ptr() as *const libc::c_void);
 
             RamulatorWrapper {
                 data: ramulator as u64,
@@ -32,11 +36,10 @@ impl Drop for RamulatorWrapper {
 }
 
 impl RamulatorWrapper {
-    pub fn send(&mut self, addr: u64, is_write: bool)  {
+    pub fn send(&mut self, addr: u64, is_write: bool) {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
             ramulator_send(ramulator_ptr, addr, is_write as libc::boolean_t);
-            
         }
     }
     pub fn get(&self) -> u64 {
@@ -77,19 +80,16 @@ impl RamulatorWrapper {
             }
         }
     }
-    
 }
 
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
 
-    
-
     #[test]
     fn ramulator_wrapper_test() {
         use super::*;
-        let mut ramulator = RamulatorWrapper::new();
+        let mut ramulator = RamulatorWrapper::new("test1.txt");
         ramulator.send(1, false);
         while !ramulator.ret_available() {
             ramulator.cycle();
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn ramulator_wrapper_full_test() {
         use super::RamulatorWrapper;
-        let mut ramulator = RamulatorWrapper::new();
+        let mut ramulator = RamulatorWrapper::new("test2.txt");
         let mut cycle = 0;
         let count = 10u64;
         let mut all_req: HashSet<_> = (1..count).into_iter().map(|i| i * 64).collect();
@@ -119,7 +119,6 @@ mod tests {
             }
             ramulator.send(i * 64, false);
             ramulator.cycle();
-
         }
         for _i in 1..count {
             while !ramulator.ret_available() {
@@ -133,7 +132,7 @@ mod tests {
             println!("{}", result);
             all_req.remove(&result);
         }
-        for _i in 0..1000{
+        for _i in 0..1000 {
             ramulator.cycle();
         }
         assert_eq!(ramulator.ret_available(), false);
@@ -141,4 +140,3 @@ mod tests {
         println!("cycle: {}", cycle);
     }
 }
-

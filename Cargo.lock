@@ -24,7 +24,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "565dbd88872dbe4cc8a46e527f26483c1d1f7afa6b884a3bd6cd893d4f98da74"
 
 [[package]]
-name = "ramulator-wrapper"
+name = "ramulator_wrapper"
 version = "0.0.1"
 dependencies = [
  "cmake",
