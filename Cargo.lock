@@ -25,7 +25,7 @@ checksum = "06e509672465a0504304aa87f9f176f2b2b716ed8fb105ebe5c02dc6dce96a94"
 
 [[package]]
 name = "ramulator_wrapper"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "cmake",
  "libc",
