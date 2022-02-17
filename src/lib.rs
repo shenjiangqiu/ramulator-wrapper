@@ -5,8 +5,7 @@
 //! # Example
 //! ```
 //! use ramulator_wrapper::RamulatorWrapper;
-//! let mut ramulator = RamulatorWrapper::new("ramulator/config/DDR3_micron_32M_8B_x8_sg125_tCK_C9.ini");
-//! ```
+//! use std::collections::HashSet;
 //! let mut ramulator = RamulatorWrapper::new("test2.txt");
 //! let mut cycle = 0;
 //! let count = 10u64;
