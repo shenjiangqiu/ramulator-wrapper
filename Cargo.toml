@@ -1,6 +1,6 @@
 [package]
 name = "ramulator_wrapper"
-version = "0.0.3"
+version = "0.1.0"
 edition = "2018"
 license = "MIT"
 description = "Wrapper for ramulator"

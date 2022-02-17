@@ -7,20 +7,25 @@ mod extern_api;
 use extern_api::*;
 
 #[derive(Debug)]
+
+/// # Description
+/// A wrapper for ramulator
+/// the only field is the pointer to ramulator
 pub struct RamulatorWrapper {
-    data: u64,
+    data: *mut libc::c_void,
 }
 
 impl RamulatorWrapper {
-    pub fn new(config_name: &str) -> Self {
+    /// create a new ramulator wrapper
+    /// # Arguments
+    /// stat_name: the file name to save the statistics
+    pub fn new(stat_name: &str) -> Self {
         unsafe {
             // get c str from config_name
-            let c_str = CString::new(config_name).unwrap();
+            let c_str = CString::new(stat_name).unwrap();
             let ramulator = get_ramulator(c_str.as_ptr() as *const libc::c_void);
 
-            RamulatorWrapper {
-                data: ramulator as u64,
-            }
+            RamulatorWrapper { data: ramulator }
         }
     }
 }
@@ -36,30 +41,35 @@ impl Drop for RamulatorWrapper {
 }
 
 impl RamulatorWrapper {
+    /// send a request to ramulator
     pub fn send(&mut self, addr: u64, is_write: bool) {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
             ramulator_send(ramulator_ptr, addr, is_write);
         }
     }
+    /// get the next returned from ramulator
     pub fn get(&self) -> u64 {
         unsafe {
             let ramulator_ptr = self.data as *const libc::c_void;
             ramulator_get(ramulator_ptr)
         }
     }
+    /// pop the next returned from ramulator
     pub fn pop(&mut self) -> u64 {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
             ramulator_pop(ramulator_ptr)
         }
     }
+    /// update the cycle of ramulator
     pub fn cycle(&mut self) {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
             ramulator_cycle(ramulator_ptr);
         }
     }
+    /// check if the returned is available
     pub fn ret_available(&mut self) -> bool {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
@@ -67,6 +77,7 @@ impl RamulatorWrapper {
             ramulator_ret_available(ramulator_ptr)
         }
     }
+    /// check if the remulator is ready to receive a request
     pub fn available(&mut self, addr: u64, is_write: bool) -> bool {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
