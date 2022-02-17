@@ -39,7 +39,7 @@ impl RamulatorWrapper {
     pub fn send(&mut self, addr: u64, is_write: bool) {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
-            ramulator_send(ramulator_ptr, addr, is_write as libc::c_int);
+            ramulator_send(ramulator_ptr, addr, is_write);
         }
     }
     pub fn get(&self) -> u64 {
@@ -64,20 +64,14 @@ impl RamulatorWrapper {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
 
-            match ramulator_ret_available(ramulator_ptr) {
-                0 => false,
-                _ => true,
-            }
+            ramulator_ret_available(ramulator_ptr)
         }
     }
     pub fn available(&mut self, addr: u64, is_write: bool) -> bool {
         unsafe {
             let ramulator_ptr = self.data as *mut libc::c_void;
 
-            match ramulator_available(ramulator_ptr, addr, is_write as libc::c_int) {
-                0 => false,
-                _ => true,
-            }
+            ramulator_available(ramulator_ptr, addr, is_write)
         }
     }
 }
