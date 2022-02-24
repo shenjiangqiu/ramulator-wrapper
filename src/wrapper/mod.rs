@@ -16,7 +16,8 @@ pub struct RamulatorWrapper {
 impl RamulatorWrapper {
     /// create a new ramulator wrapper
     /// # Arguments
-    /// stat_name: the file name to save the statistics
+    /// - config_name: the config file name
+    /// - stat_name: the file name to save the statistics
     pub fn new(config_name: &str, stat_name: &str) -> Self {
         unsafe {
             // get c str from config_name
