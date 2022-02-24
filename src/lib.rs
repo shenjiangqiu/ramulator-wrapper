@@ -6,7 +6,7 @@
 //! ```
 //! use ramulator_wrapper::RamulatorWrapper;
 //! use std::collections::HashSet;
-//! let mut ramulator = RamulatorWrapper::new("test2.txt");
+//! let mut ramulator = RamulatorWrapper::new("HBM-config.cfg","test2.txt");
 //! let mut cycle = 0;
 //! let count = 10u64;
 //! let mut all_req: HashSet<_> = (1..count).into_iter().map(|i| i * 64).collect();

@@ -1,7 +1,5 @@
 use std::ffi::CString;
 
-use libc;
-
 mod extern_api;
 
 use extern_api::*;
@@ -19,11 +17,15 @@ impl RamulatorWrapper {
     /// create a new ramulator wrapper
     /// # Arguments
     /// stat_name: the file name to save the statistics
-    pub fn new(stat_name: &str) -> Self {
+    pub fn new(config_name: &str, stat_name: &str) -> Self {
         unsafe {
             // get c str from config_name
-            let c_str = CString::new(stat_name).unwrap();
-            let ramulator = get_ramulator(c_str.as_ptr() as *const libc::c_void);
+            let config_name = CString::new(config_name).unwrap();
+            let stats_name = CString::new(stat_name).unwrap();
+            let ramulator = get_ramulator(
+                config_name.as_ptr() as *const libc::c_void,
+                stats_name.as_ptr() as *const libc::c_void,
+            );
 
             RamulatorWrapper { data: ramulator }
         }
@@ -94,26 +96,26 @@ mod tests {
     #[test]
     fn ramulator_wrapper_test() {
         use super::*;
-        let mut ramulator = RamulatorWrapper::new("test1.txt");
+        let mut ramulator = RamulatorWrapper::new("HBM-config.cfg", "test1.txt");
         ramulator.send(1, false);
         while !ramulator.ret_available() {
             ramulator.cycle();
         }
         let ret = ramulator.get();
         assert_eq!(ret, 1);
-        assert_eq!(ramulator.ret_available(), true);
+        assert!(ramulator.ret_available());
         ramulator.cycle();
         ramulator.pop();
         ramulator.cycle();
 
-        assert_eq!(ramulator.ret_available(), false);
-        assert_eq!(ramulator.available(0, false), true);
+        assert!(!ramulator.ret_available());
+        assert!(ramulator.available(0, false));
     }
 
     #[test]
     fn ramulator_wrapper_full_test() {
         use super::RamulatorWrapper;
-        let mut ramulator = RamulatorWrapper::new("test2.txt");
+        let mut ramulator = RamulatorWrapper::new("HBM-config.cfg", "test2.txt");
         let mut cycle = 0;
         let count = 10u64;
         let mut all_req: HashSet<_> = (1..count).into_iter().map(|i| i * 64).collect();
@@ -140,7 +142,7 @@ mod tests {
         for _i in 0..1000 {
             ramulator.cycle();
         }
-        assert_eq!(ramulator.ret_available(), false);
+        assert!(!ramulator.ret_available());
 
         println!("cycle: {}", cycle);
     }
