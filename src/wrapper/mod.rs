@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 pub struct RamulatorWrapper {
     data: *mut libc::c_void,
 }
+#[repr(C)]
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum PresetConfigs {
     ALDRAM,
