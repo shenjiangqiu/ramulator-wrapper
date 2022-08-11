@@ -38,4 +38,5 @@
 //! println!("cycle: {}", cycle);
 //! ```
 mod wrapper;
+pub use wrapper::PresetConfigs;
 pub use wrapper::RamulatorWrapper;
