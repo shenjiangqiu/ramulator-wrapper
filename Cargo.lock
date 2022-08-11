@@ -43,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "ramulator_wrapper"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "cmake",
  "libc",
