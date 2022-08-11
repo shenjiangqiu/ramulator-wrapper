@@ -3,6 +3,7 @@ use std::ffi::CString;
 mod extern_api;
 
 use extern_api::*;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 
@@ -12,6 +13,7 @@ use extern_api::*;
 pub struct RamulatorWrapper {
     data: *mut libc::c_void,
 }
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum PresetConfigs {
     ALDRAM,
     DDR4,
