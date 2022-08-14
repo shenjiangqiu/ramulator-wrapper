@@ -32,7 +32,7 @@ pub enum PresetConfigs {
     WideIO,
 }
 impl PresetConfigs {
-    pub fn get_file_content(&self) -> String {
+    pub fn get_file_content(&self) -> &'static str {
         let contenet = match self {
             PresetConfigs::ALDRAM => include_str!("../../ramulator/configs/ALDRAM-config.cfg"),
             PresetConfigs::DDR4 => include_str!("../../ramulator/configs/DDR4-config.cfg"),
@@ -49,7 +49,7 @@ impl PresetConfigs {
             PresetConfigs::TLDRAM => include_str!("../../ramulator/configs/TLDRAM-config.cfg"),
             PresetConfigs::WideIO => include_str!("../../ramulator/configs/WideIO-config.cfg"),
         };
-        contenet.to_string()
+        contenet
     }
 }
 
