@@ -13,6 +13,13 @@ use serde::{Deserialize, Serialize};
 pub struct RamulatorWrapper {
     data: *mut libc::c_void,
 }
+/// # Description
+/// it's send because it own all the data it have, no shared resource
+unsafe impl Send for RamulatorWrapper {}
+/// # Description
+/// it's sync because the shared reference of it will have no chance to change the interial data.
+unsafe impl Sync for RamulatorWrapper {}
+
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum PresetConfigs {
